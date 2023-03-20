@@ -16,5 +16,8 @@
   "bugs": {
     "url": "https://github.com/010JGL/tinyapp/issues"
   },
-  "homepage": "https://github.com/010JGL/tinyapp#readme"
+  "homepage": "https://github.com/010JGL/tinyapp#readme",
+  "dependencies": {
+    "express": "^4.18.2"
+  }
 }
