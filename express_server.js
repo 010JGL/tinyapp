@@ -69,6 +69,21 @@ app.post("/urls/:id/delete", (req, res) => {
   res.redirect(`/urls`)
 });
 
+// app.get("/urls/:id", (req, res) => {
+
+  
+//   res.redirect()
+// }
+
+app.post("/urls/:id", (req, res) => {
+  const id = req.params.id                   // import id data with req
+  //console.log('req.body :', req.body);
+  //console.log('id', id);
+  
+  urlDatabase[id] = req.body.urlInput        // refer to the data with the name we gave the input
+  res.redirect('/urls')
+});
+
 app.get("/u/:id", (req, res) => {
   const id = req.params.id              // gets the 6 random string associated with that URL
   

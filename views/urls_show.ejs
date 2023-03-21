@@ -41,6 +41,13 @@
         <p class="card-text">
           Short URL ID: <a href="/u/<%= id %>"><%= id %></a>
         </p>
+          <p>
+            <form method="POST" action="/urls/<%= id %>">  <!-- Links the action to the server with route-->
+              <label for="urlInput">New URL:</label>       <!-- text before the input-->
+              <input type="text" name="urlInput">           <!-- Input for the url, make sure it has a name to link-->
+            <button type="submit">Edit</button>         <!--button inside of a form to link it -->
+          </form>
+        </p>
       </div>
       <div class="card-footer text-muted"></div>
     </div>

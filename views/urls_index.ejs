@@ -63,6 +63,11 @@
                   <button type="submit">Delete</button>         <!--button inside of a form to link it -->
                 </form>
               </td>
+              <td>
+                <form method="GET" action="/urls/<%= id %>">  <!-- Links the pages together. urls to show -->
+                <button type="submit">Edit</button>         <!--button inside of a form to link it -->
+              </form>
+            </td>
             </tr>
           <% } %>
         </tbody>
