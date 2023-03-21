@@ -8,8 +8,6 @@ const urlDatabase = {
   "9sm5xK": "http://www.google.com"
 };
 
-function generateRandomString() {}
-
 
 app.use(express.urlencoded({ extended: true }));
 
@@ -55,6 +53,31 @@ app.listen(PORT, () => {
 });
 
 app.post("/urls", (req, res) => {
+  
+  let id = generateRandomString()           // create a random id
+  urlDatabase[id] = req.body.longURL        // push the value of req.body at the id key we just generated
+ 
   console.log(req.body); // Log the POST request body to the console
-  res.send("Ok");        // Respond with 'Ok' (we will replace this)
+  res.redirect(`/urls/${id}`);        // Respond with 'Ok' (we will replace this)
 });
+
+app.get("/u/:id", (req, res) => {
+  let id = req.params.id              // gets the 6 random string associated with that URL
+  
+  const longURL = urlDatabase[id];    // link the id with the URL
+  res.redirect(longURL);
+});
+
+
+const characters ='ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+
+function generateRandomString() {
+  let result = "";
+  
+  for (let i = 0; i < 6; i++) {
+    result += characters.charAt(Math.floor(Math.random() * characters.length))
+  }
+  return result;
+};
+
+//console.log(generateRandomString());
