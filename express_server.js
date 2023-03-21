@@ -54,15 +54,23 @@ app.listen(PORT, () => {
 
 app.post("/urls", (req, res) => {
   
-  let id = generateRandomString()           // create a random id
+  const id = generateRandomString()           // create a random id
   urlDatabase[id] = req.body.longURL        // push the value of req.body at the id key we just generated
  
   console.log(req.body); // Log the POST request body to the console
   res.redirect(`/urls/${id}`);        // Respond with 'Ok' (we will replace this)
 });
 
+app.post("/urls/:id/delete", (req, res) => {
+  
+  const id = req.params.id;    //gets the ID from req.params
+
+  delete urlDatabase[id];       // delete the data associated with the id
+  res.redirect(`/urls`)
+});
+
 app.get("/u/:id", (req, res) => {
-  let id = req.params.id              // gets the 6 random string associated with that URL
+  const id = req.params.id              // gets the 6 random string associated with that URL
   
   const longURL = urlDatabase[id];    // link the id with the URL
   res.redirect(longURL);
