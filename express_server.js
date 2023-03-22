@@ -12,6 +12,18 @@ const urlDatabase = {
   "9sm5xK": "http://www.google.com"
 };
 
+const users = {         //examples ID
+  userRandomID: {
+    id: "userRandomID",
+    email: "user@example.com",
+    password: "purple-monkey-dinosaur",
+  },
+  user2RandomID: {
+    id: "user2RandomID",
+    email: "user2@example.com",
+    password: "dishwasher-funk",
+  },
+};
 
 app.use(express.urlencoded({ extended: true }));
 
@@ -23,14 +35,16 @@ app.get("/urls", (req, res) => {           // passing the username to index
   
   const userId = req.cookies["user_id"] || null
 
-  const templateVars = { urls: urlDatabase, userId: userId };
+  const templateVars = { urls: urlDatabase, userId: users[userId]};
   res.render("urls_index", templateVars);
 });
 
 
 
 app.get("/urls/new", (req, res) => {   // new route, should be ordered to most specific to least specific
-  const templateVars = {userId: req.cookies["user_id"]}
+  const userId = req.cookies['user_id']
+  //console.log(userId)
+  const templateVars = {userId: users[userId]}
   res.render("urls_new", templateVars);
 });
 
@@ -81,7 +95,7 @@ app.post("/login", (req, res) => {
   const username = req.body.username;
   const userId = JSON.stringify(username)
   
-  console.log(userId)
+  //console.log(userId)
   res.cookie('user_id', userId)
   res.redirect("/urls")
 
@@ -109,6 +123,31 @@ app.post('/logout', (req, res) => {
 
 });
 
+app.get('/register', (req, res) => {
+  const userId = req.cookies["user_id"] || null
+
+  const templateVars = { urls: urlDatabase, userId: userId };
+//console.log(users[userId])
+  res.render('urls_register', templateVars)
+});
+
+app.post('/register', (req, res) => {
+  //add new user to object
+  const { email, password } = req.body;
+  //console.log(req.body)
+  const userId = generateRandomString();
+
+  users[userId] = {
+    id: userId,
+    email: email,
+    password, password
+  };
+  
+  res.cookie('user_id', userId);
+  res.redirect('/urls')
+  console.log(users[userId])
+  
+});
 
 const characters ='ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
 

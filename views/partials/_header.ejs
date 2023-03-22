@@ -19,7 +19,7 @@
         <!--if we are logged in-->
         <% if (userId) { %>
           <li>
-            Hello <%= userId %>
+            Hello <%= userId.email %>
             <li>
               <form method="POST" action="/logout">
                 <input type="submit" value="Logout">
