@@ -71,9 +71,9 @@ app.post("/urls/:id/delete", (req, res) => {
 
 app.post("/login", (req, res) => {
   const loginName = req.body;
-  console.log("loginName: ", loginName);
+  //console.log("loginName: ", loginName);
   const str = JSON.stringify(loginName.username)
-  console.log("loginName: ", str);
+  //console.log("loginName: ", str);
   res.cookie('name', str)
   res.redirect("/urls")
 
