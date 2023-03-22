@@ -7,6 +7,8 @@ const cookieParser = require("cookie-parser");
 app.set("view engine", "ejs"); // template ejs
 app.use(cookieParser());
 
+
+
 const urlDatabase = {
   "b2xVn2": "http://www.lighthouselabs.ca",
   "9sm5xK": "http://www.google.com"
@@ -23,6 +25,15 @@ const users = {         //examples ID
     email: "user2@example.com",
     password: "dishwasher-funk",
   },
+};
+
+const findUserByEmail = (email) => {
+  for (let userId in users) {
+    if (email === users[userId].email) {
+      return users[userId];
+    }
+  }
+  return false
 };
 
 app.use(express.urlencoded({ extended: true }));
@@ -132,16 +143,33 @@ app.get('/register', (req, res) => {
 });
 
 app.post('/register', (req, res) => {
-  //add new user to object
   const { email, password } = req.body;
-  //console.log(req.body)
+  
+  if (email === "") {
+    res.status(400).send('User invalid')
+  }
   const userId = generateRandomString();
+  
+  if (findUserByEmail(email)) {
+    res.status(400).send('Email already exist')
+  }
 
   users[userId] = {
     id: userId,
     email: email,
     password, password
   };
+
+  const user = findUserByEmail(email);    // lower so we can check the database once its updated
+  console.log('user.email', user.email);
+
+  console.log('users[userId]', users[userId]);
+  
+  
+  res.cookie('user_id', user.id);
+  return res.redirect('/urls')
+
+
   
   res.cookie('user_id', userId);
   res.redirect('/urls')
