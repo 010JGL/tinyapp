@@ -16,10 +16,18 @@
       <div class="navbar-nav">
         <a class="nav-item nav-link" href="/urls">My URLs</a>
         <a class="nav-item nav-link" href="/urls/new">Create New URL</a>
-        <form method="POST" action="/login" name="username"> 
-          <input type="text" name="username" placeholder="Username" required>
-          <button type="submit">Login</button>
-        </form>
+        <!--if we are logged in-->
+        <% if (userId) { %>
+          <li>
+            Hello <%= userId %>
+          </li>
+          <% } else { %>
+            <!--if we are logged out-->
+            <form method="POST" action="/login">            <!-- form doesnt need a name-->
+              <input type="text" name="username" placeholder="Username" required>  <!-- name links to the route-->
+              <button type="submit">Login</button>
+            </form>
+      <% } %>
       </div>
     </div>
   </nav>

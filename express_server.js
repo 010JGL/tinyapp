@@ -1,7 +1,11 @@
 const express = require("express");
 const app = express();
 const PORT = 8080; // default port 8080
+
+const cookieParser = require("cookie-parser");
+
 app.set("view engine", "ejs"); // template ejs
+app.use(cookieParser());
 
 const urlDatabase = {
   "b2xVn2": "http://www.lighthouselabs.ca",
@@ -15,19 +19,24 @@ app.get("/", (req, res) => {
   res.send("Hello!");
 });
 
-app.get("/urls", (req, res) => {
-  const templateVars = { urls: urlDatabase };
+app.get("/urls", (req, res) => {           // passing the username to index
+  
+  const userId = req.cookies["user_id"] || null
+
+  const templateVars = { urls: urlDatabase, userId: userId };
   res.render("urls_index", templateVars);
 });
 
 
 
 app.get("/urls/new", (req, res) => {   // new route, should be ordered to most specific to least specific
-  res.render("urls_new");
+  const templateVars = {userId: req.cookies["user_id"]}
+  res.render("urls_new", templateVars);
 });
 
 app.get("/urls/:id", (req, res) => {   // :id route parameter
-  const templateVars = { id: req.params.id, longURL: urlDatabase[req.params.id] };
+  const userId = req.cookies["user_id"] || null
+  const templateVars = { id: req.params.id, longURL: urlDatabase[req.params.id], userId: userId };
   res.render("urls_show", templateVars);
 });
 
@@ -57,7 +66,6 @@ app.post("/urls", (req, res) => {
   const id = generateRandomString()           // create a random id
   urlDatabase[id] = req.body.longURL        // push the value of req.body at the id key we just generated
  
-  console.log(req.body); // Log the POST request body to the console
   res.redirect(`/urls/${id}`);        // Respond with 'Ok' (we will replace this)
 });
 
@@ -70,11 +78,11 @@ app.post("/urls/:id/delete", (req, res) => {
 });
 
 app.post("/login", (req, res) => {
-  const loginName = req.body;
-  //console.log("loginName: ", loginName);
-  const str = JSON.stringify(loginName.username)
-  //console.log("loginName: ", str);
-  res.cookie('name', str)
+  const username = req.body.username;
+  const userId = JSON.stringify(username)
+  
+  console.log(userId)
+  res.cookie('user_id', userId)
   res.redirect("/urls")
 
 })
