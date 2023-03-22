@@ -45,7 +45,6 @@ app.get("/", (req, res) => {
 app.get("/urls", (req, res) => {           // passing the username to index
   
   const userId = req.cookies["user_id"] || null
-
   const templateVars = { urls: urlDatabase, userId: users[userId]};
   res.render("urls_index", templateVars);
 });
@@ -53,8 +52,8 @@ app.get("/urls", (req, res) => {           // passing the username to index
 
 
 app.get("/urls/new", (req, res) => {   // new route, should be ordered to most specific to least specific
+  
   const userId = req.cookies['user_id']
-  //console.log(userId)
   const templateVars = {userId: users[userId]}
   res.render("urls_new", templateVars);
 });
@@ -90,38 +89,35 @@ app.post("/urls", (req, res) => {
   
   const id = generateRandomString()           // create a random id
   urlDatabase[id] = req.body.longURL        // push the value of req.body at the id key we just generated
- 
   res.redirect(`/urls/${id}`);        // Respond with 'Ok' (we will replace this)
 });
 
 app.post("/urls/:id/delete", (req, res) => {
   
   const id = req.params.id;    //gets the ID from req.params
-
   delete urlDatabase[id];       // delete the data associated with the id
   res.redirect(`/urls`)
 });
 
 app.post("/login", (req, res) => {
+  
   const username = req.body.username;
   const userId = JSON.stringify(username)
-  
-  //console.log(userId)
   res.cookie('user_id', userId)
   res.redirect("/urls")
 
 })
 
 app.post("/urls/:id", (req, res) => {
+  
   const id = req.params.id                   // import id data with req
-
   urlDatabase[id] = req.body.urlInput        // refer to the data with the name we gave the input
   res.redirect('/urls')
 });
 
 app.get("/u/:id", (req, res) => {
-  const id = req.params.id              // gets the 6 random string associated with that URL
   
+  const id = req.params.id              // gets the 6 random string associated with that URL
   const longURL = urlDatabase[id];    // link the id with the URL
   res.redirect(longURL);
 });
@@ -129,16 +125,14 @@ app.get("/u/:id", (req, res) => {
 app.post('/logout', (req, res) => {
 
   res.clearCookie('user_id');
-
   res.redirect('/urls')
 
 });
 
 app.get('/register', (req, res) => {
+  
   const userId = req.cookies["user_id"] || null
-
   const templateVars = { urls: urlDatabase, userId: userId };
-//console.log(users[userId])
   res.render('urls_register', templateVars)
 });
 
@@ -161,14 +155,18 @@ app.post('/register', (req, res) => {
   };
 
   const user = findUserByEmail(email);    // lower so we can check the database once its updated
-  //console.log('user.email', user.email);
-
-  //console.log('users[userId]', users[userId]);
   
   res.cookie('user_id', user.id);
   return res.redirect('/urls')
-
 });
+
+app.get('/login', (req, res) => {
+  
+  const userId = req.cookies["user_id"] || null
+  const templateVars = { urls: urlDatabase, userId: userId };
+  res.render('urls_login', templateVars)
+});
+
 
 const characters ='ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
 
@@ -181,4 +179,3 @@ function generateRandomString() {
   return result;
 };
 
-//console.log(generateRandomString());
