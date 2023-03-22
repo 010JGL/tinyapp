@@ -161,20 +161,13 @@ app.post('/register', (req, res) => {
   };
 
   const user = findUserByEmail(email);    // lower so we can check the database once its updated
-  console.log('user.email', user.email);
+  //console.log('user.email', user.email);
 
-  console.log('users[userId]', users[userId]);
-  
+  //console.log('users[userId]', users[userId]);
   
   res.cookie('user_id', user.id);
   return res.redirect('/urls')
 
-
-  
-  res.cookie('user_id', userId);
-  res.redirect('/urls')
-  console.log(users[userId])
-  
 });
 
 const characters ='ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
