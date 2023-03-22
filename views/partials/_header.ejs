@@ -20,6 +20,11 @@
         <% if (userId) { %>
           <li>
             Hello <%= userId %>
+            <li>
+              <form method="POST" action="/logout">
+                <input type="submit" value="Logout">
+              </form>
+            </li>
           </li>
           <% } else { %>
             <!--if we are logged out-->

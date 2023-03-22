@@ -101,6 +101,14 @@ app.get("/u/:id", (req, res) => {
   res.redirect(longURL);
 });
 
+app.post('/logout', (req, res) => {
+
+  res.clearCookie('user_id');
+
+  res.redirect('/urls')
+
+});
+
 
 const characters ='ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
 
