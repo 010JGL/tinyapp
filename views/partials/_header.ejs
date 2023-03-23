@@ -22,13 +22,14 @@
             Hello <%= userId.email %>
             <form method="POST" action="/logout">
               <button type="submit">Logout</button>
+              </form>
           </li>
           <% } else { %>
             <!--if we are logged out-->
             <form method="GET" action="/register">
               <button type="submit">Register</button> 
             </form>
-            <form method="GET" action="/urls_login">
+            <form method="GET" action="/login">
               <button type="submit">Log in</button> 
             </form>   
             
