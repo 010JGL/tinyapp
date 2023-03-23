@@ -35,6 +35,14 @@ const findUserByEmail = (email) => {
   }
   return false
 };
+const findUserByPass = (password) => {
+  for (let userId in users) {
+    if (password === users[userId].password) {
+      return users[userId];
+    }
+  }
+  return false
+};
 
 app.use(express.urlencoded({ extended: true }));
 
@@ -101,8 +109,8 @@ app.post("/urls/:id/delete", (req, res) => {
 
 app.post("/login", (req, res) => {
   
-  const username = req.body.username;
-  const userId = JSON.stringify(username)
+  //const username = req.body.username;
+  const userId = JSON.stringify(req.body.username)
   res.cookie('user_id', userId)
   res.redirect("/urls")
 
@@ -125,7 +133,7 @@ app.get("/u/:id", (req, res) => {
 app.post('/logout', (req, res) => {
 
   res.clearCookie('user_id');
-  res.redirect('/urls')
+  res.redirect('/login')
 
 });
 
@@ -165,6 +173,36 @@ app.get('/login', (req, res) => {
   const userId = req.cookies["user_id"] || null
   const templateVars = { urls: urlDatabase, userId: userId };
   res.render('urls_login', templateVars)
+  
+});
+
+
+app.post('/urls_login', (req, res) => {
+  const { email, password } = req.body;
+  console.log('this is email', req.body);
+  if (email === "") {
+    res.status(403).send('User invalid')
+  }
+  const userId = generateRandomString();
+  
+  if (findUserByEmail(email) === false) {
+    res.status(400).send('Email cannot be found')
+  }
+  if (findUserByPass(password) === false) {
+    res.status(403).send('Wrong password.')
+  }
+
+  users[userId] = {
+    id: userId,
+    email: email,
+    password: password
+  }
+
+  const user = findUserByEmail(email);    // lower so we can check the database once its updated
+  
+  res.cookie('user_id', user.id);
+  res.redirect('/urls')
+  
 });
 
 

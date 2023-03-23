@@ -20,7 +20,7 @@
         <% if (userId) { %>
           <li>
             Hello <%= userId.email %>
-            <form method="GET" action="/logout">
+            <form method="POST" action="/logout">
               <button type="submit">Logout</button>
           </li>
           <% } else { %>
@@ -28,7 +28,7 @@
             <form method="GET" action="/register">
               <button type="submit">Register</button> 
             </form>
-            <form method="GET" action="/login">
+            <form method="GET" action="/urls_login">
               <button type="submit">Log in</button> 
             </form>   
             
