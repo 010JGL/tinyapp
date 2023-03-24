@@ -3,14 +3,21 @@ const express = require("express");
 const app = express();
 const PORT = 8080; // default port 8080
 // enables cookie parser
-const cookieParser = require("cookie-parser");
+//const cookieParser = require("cookie-parser"); Removed this for cookie session
 // enables bcryptjs
 const bcrypt = require("bcryptjs");
+// enables cookie session
+const cookieSession = require('cookie-session');
 
 app.use(express.urlencoded({ extended: true }));
 app.set("view engine", "ejs"); // setting template ejs
-app.use(cookieParser()); //to access req.cookies object
+//app.use(cookieParser()); //to access req.cookies object
+app.use(cookieSession({
+  name: 'session',
+  keys: ["the secret value"],
+}));
 
+const { findUserByEmail } = require('./helpers.js');
 ////// Const
 
 const urlDatabase = {
@@ -40,14 +47,7 @@ const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz01234567
 
 
 /// Funcs
-const findUserByEmail = (email) => {
-  for (let userId in users) {
-    if (email === users[userId].email) {
-      return users[userId];
-    }
-  }
-  return false;
-};
+
 const findUserById = (userId) => {
   for (let id in users) {
     if (userId === id) {
@@ -91,8 +91,9 @@ app.get("/", (req, res) => {
 });
 
 app.get("/urls", (req, res) => {
-  const userId = req.cookies["user_id"];       // gets the userId in cookies info
-   
+  //const userId = req.cookies["user_id"];       // gets the userId in cookies info
+  const userId = req.session.user_id;             // get userId in the new way, with session
+  //console.log('userId', userId)
   if (!userId) {                                // if there is no user logged in
     const msg = `<div>You have to be logged in</div>`;
     return res.status(400).send(msg);
@@ -103,31 +104,31 @@ app.get("/urls", (req, res) => {
   }
   
   const usersUrl = urlsForUser(userId);
-  const templateVars = { urls: usersUrl, userId: currentUser["id"], users: users };
+  const templateVars = { urls: usersUrl, userId: userId, users: users };
 
   return res.render("urls_index", templateVars);
 });
 
 app.post("/urls", (req, res) => {
   
-  const userId = req.cookies["user_id"] || null;
+  const userId = req.session.user_id;
   if (!userId) {
     const box = `<div>You have to be logged in</div>`;
     return res.status(400).send(box);
   }
-  const id = generateRandomString();           // create a random id
+  const shortUrl = generateRandomString();           // create a random id
   
-  urlDatabase[id] = {                    // how to update the data base with the new infos
+  urlDatabase[shortUrl] = {                    // how to update the data base with the new infos
     longURL: req.body.longURL,
-    userID: req.cookies["user_id"]
+    userID: req.session.user_id
   };
 
-  res.redirect(`/urls/${id}`);        // Respond with 'Ok' (we will replace this)
+  res.redirect(`/urls/${shortUrl}`);        // Respond with 'Ok' (we will replace this)
 });
 
 app.get("/urls/new", (req, res) => {   // new route, should be ordered to most specific to least specific
   
-  const userId = req.cookies["user_id"] || null;
+  const userId = req.session.user_id;
   if (!userId) {                  // Cannot create a new URL if not logged in
     
     return res.redirect('/login');
@@ -141,7 +142,7 @@ app.get("/urls/new", (req, res) => {   // new route, should be ordered to most s
 app.get("/urls/:id", (req, res) => {   // :id route parameter
   const shorty = req.params.id;        // gets the :id value from the URL
   
-  const userId = req.cookies["user_id"] || null;
+  const userId = req.session.user_id || null;
   if (!userId) {
     const box = `<div>You have to be logged in</div>`;
     return res.status(400).send(box);
@@ -178,7 +179,7 @@ app.get("/fetch", (req, res) => {
 
  
 app.post("/urls/:id/delete", (req, res) => {
-  const userId = req.cookies["user_id"] || null;
+  const userId = req.session.user_id;
   const id = req.params.id;    //gets the ID from req.params
   if (!userId) {
     const box = `<div>You have to be logged in</div>`;
@@ -198,7 +199,7 @@ app.post("/urls/:id/delete", (req, res) => {
   
 app.post("/urls/:id", (req, res) => {
   const id = req.params.id;                   // import id data with req
-  const userId = req.cookies["user_id"] || null;
+  const userId = req.session.user_id || null;
   if (!userId) {
     const box = `<div>You have to be logged in</div>`;
     return res.status(400).send(box);
@@ -217,7 +218,7 @@ app.post("/urls/:id", (req, res) => {
   
 app.get("/u/:id", (req, res) => {
   const id = req.params.id;              // gets the 6 random string associated with that URL
-  const id2 = req.cookies.user_id;        // the value of user_id in the object cookies
+  const id2 = req.session.user_id;        // the value of user_id in the object cookies
   const longURL = urlDatabase[id].longURL;    // link the id with the URL
   
   if (id2 !== urlDatabase[id].userID) {       //if the cookie user_id is not in database
@@ -227,14 +228,15 @@ app.get("/u/:id", (req, res) => {
 });
   
 app.post('/logout', (req, res) => {
-  const userId = req.cookies["user_id"] || null;
-  res.clearCookie('user_id');
+  
+  //res.clearCookie('user_id');
+  req.session = null;       // clear cookies equivalent, also destroy the signature
   res.redirect('/login');
 });
   
 app.get('/register', (req, res) => {
     
-  const userId = req.cookies["user_id"] || null;
+  const userId = req.session.user_id || null;
   const templateVars = { userId: userId };
   
   if (!userId) {
@@ -254,7 +256,7 @@ app.post('/register', (req, res) => {
   }
   const userId = generateRandomString();
   
-  if (findUserByEmail(email)) {
+  if (findUserByEmail(email, users)) {
     res.status(400).send('Email already exist');
     return;
   }
@@ -265,15 +267,16 @@ app.post('/register', (req, res) => {
     password: hashedPassword
   };
   
-  const user = findUserByEmail(email);    // lower so we can check the database once its updated
+  const user = findUserByEmail(email, users);    // lower so we can check the database once its updated
   
-  res.cookie('user_id', user.id);
+  //res.cookie('user_id', user.id);
+  req.session.user_id = user.id;             // creation of the cookie
   return res.redirect('/urls');
 });
 
 app.get('/login', (req, res) => {
   
-  const userId = req.cookies["user_id"] || null;
+  const userId = req.session.user_id;
   const templateVars = { userId: userId };
   
   if (!userId) {
@@ -287,15 +290,15 @@ app.get('/login', (req, res) => {
 
 app.post('/login', (req, res) => {
   const { email, password } = req.body;
-  const hashedPassword = bcrypt.hashSync(password, 10)
+  
+  const hashedPassword = bcrypt.hashSync(password, 10);
   if (email === "") {
     res.status(403).send('User invalid');
     return;
   }
   
-  const user = findUserByEmail(email);      // lower so we can check the database once its updated
+  const user = findUserByEmail(email, users);      // lower so we can check the database once its updated
   
-
   if (!user) {
     return res.status(400).send('Email cannot be found');
   }
@@ -303,7 +306,8 @@ app.post('/login', (req, res) => {
     return res.status(403).send('Wrong password.');
   }
   
-  res.cookie('user_id', user.id);
+  //res.cookie('user_id', user.id);  // old way of creating cookie
+  req.session.user_id = user.id;     // creation of the cookie
   res.redirect('/urls');
 });
 
