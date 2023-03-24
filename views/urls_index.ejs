@@ -36,7 +36,7 @@
               <td><%= id %>
                 
               </td>
-              <td><%= urls[id] %>
+              <td><%= urls[id].longURL %>     <!-- added longURL-->
               </td>
               <td>
                 <form method="POST" action="/urls/<%= id %>/delete">  <!-- Links the action to the server with route-->
