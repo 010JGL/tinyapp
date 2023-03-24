@@ -4,6 +4,8 @@ const app = express();
 const PORT = 8080; // default port 8080
 // enables cookie parser
 const cookieParser = require("cookie-parser");
+// enables bcryptjs
+const bcrypt = require("bcryptjs");
 
 app.use(express.urlencoded({ extended: true }));
 app.set("view engine", "ejs"); // setting template ejs
@@ -244,7 +246,8 @@ app.get('/register', (req, res) => {
 
 app.post('/register', (req, res) => {
   const { email, password } = req.body;
-  
+  const hashedPassword = bcrypt.hashSync(password, 10);  // hashes the password with bcrypt
+
   if (email === "") {
     res.status(400).send('User invalid');
     return;
@@ -259,7 +262,7 @@ app.post('/register', (req, res) => {
   users[userId] = {
     id: userId,
     email: email,
-    password: password
+    password: hashedPassword
   };
   
   const user = findUserByEmail(email);    // lower so we can check the database once its updated
@@ -284,7 +287,7 @@ app.get('/login', (req, res) => {
 
 app.post('/login', (req, res) => {
   const { email, password } = req.body;
-  
+  const hashedPassword = bcrypt.hashSync(password, 10)
   if (email === "") {
     res.status(403).send('User invalid');
     return;
@@ -292,10 +295,11 @@ app.post('/login', (req, res) => {
   
   const user = findUserByEmail(email);      // lower so we can check the database once its updated
   
+
   if (!user) {
     return res.status(400).send('Email cannot be found');
   }
-  if (user.password !== password) {
+  if (bcrypt.compareSync(user.password, hashedPassword) !== true) {     // compares the password provided with the hash version
     return res.status(403).send('Wrong password.');
   }
   
