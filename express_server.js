@@ -9,6 +9,9 @@ const bcrypt = require("bcryptjs");
 // enables cookie session
 const cookieSession = require('cookie-session');
 
+const { findUserByEmail, generateRandomString, findUserById, urlsForUser } = require('./helpers.js');
+
+
 app.use(express.urlencoded({ extended: true }));
 app.set("view engine", "ejs"); // setting template ejs
 //app.use(cookieParser()); //to access req.cookies object
@@ -17,8 +20,7 @@ app.use(cookieSession({
   keys: ["the secret value"],
 }));
 
-const { findUserByEmail } = require('./helpers.js');
-////// Const
+
 
 const urlDatabase = {
   b6UTxQ: {
@@ -31,7 +33,7 @@ const urlDatabase = {
   },
 };
 
-const users = {         //examples ID
+const users = {         //examples ID added the database with functions so they work properly
   aJ48lW: {
     id: "aJ48lW",
     email: "a@a.com",
@@ -43,48 +45,7 @@ const users = {         //examples ID
     password: "123",
   },
 };
-const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
 
-
-/// Funcs
-
-const findUserById = (userId) => {
-  for (let id in users) {
-    if (userId === id) {
-      return users[id];
-    }
-  }
-  return null;
-};
-
-const urlsForUser = (userId) => {
-  const results = {};
-  for (let shortUrl in urlDatabase) {                //looking for the shortUrl in the database
-
-    if (userId === urlDatabase[shortUrl].userID) {    // check if the userid is in the database
-      results[shortUrl] = urlDatabase[shortUrl];       // makes the links in the database in the empty object
-    }
-  }
-  return results;
-};
-
-function generateRandomString() {
-  let result = "";
-  
-  for (let i = 0; i < 6; i++) {
-    result += characters.charAt(Math.floor(Math.random() * characters.length));
-  }
-  return result;
-}
-// Not in use right now
-// const findUserByPass = (password) => {
-//   for (let userId in users) {
-//     if (password === users[userId].password) {
-//       return users[userId];
-//     }
-//   }
-//   return false;
-// };
 
 app.get("/", (req, res) => {
   res.send("Hello!");
@@ -93,7 +54,7 @@ app.get("/", (req, res) => {
 app.get("/urls", (req, res) => {
   //const userId = req.cookies["user_id"];       // gets the userId in cookies info
   const userId = req.session.user_id;             // get userId in the new way, with session
-  //console.log('userId', userId)
+ 
   if (!userId) {                                // if there is no user logged in
     const msg = `<div>You have to be logged in</div>`;
     return res.status(400).send(msg);
@@ -104,6 +65,7 @@ app.get("/urls", (req, res) => {
   }
   
   const usersUrl = urlsForUser(userId);
+  console.log(usersUrl)
   const templateVars = { urls: usersUrl, userId: userId, users: users };
 
   return res.render("urls_index", templateVars);
@@ -312,3 +274,6 @@ app.post('/login', (req, res) => {
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
 });
+
+
+module.exports = { urlDatabase, users}
