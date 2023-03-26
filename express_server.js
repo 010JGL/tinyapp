@@ -65,7 +65,7 @@ app.get("/urls", (req, res) => {
   }
   
   const usersUrl = urlsForUser(userId);
-  console.log(usersUrl)
+  console.log(usersUrl);
   const templateVars = { urls: usersUrl, userId: userId, users: users };
 
   return res.render("urls_index", templateVars);
@@ -89,7 +89,7 @@ app.post("/urls", (req, res) => {
 });
 
 app.get("/urls/new", (req, res) => {   // new route, should be ordered to most specific to least specific
-  const usersDatabase = users
+  const usersDatabase = users;
   const userId = req.session.user_id;
   if (!userId) {                  // Cannot create a new URL if not logged in
     
@@ -103,7 +103,7 @@ app.get("/urls/new", (req, res) => {   // new route, should be ordered to most s
 
 app.get("/urls/:id", (req, res) => {   // :id route parameter
   const shorty = req.params.id;        // gets the :id value from the URL
-  const usersDatabase = users
+  const usersDatabase = users;
   const userId = req.session.user_id || null;
   if (!userId) {
     const box = `<div>You have to be logged in</div>`;
@@ -230,7 +230,6 @@ app.post('/register', (req, res) => {
   };
   
   const user = findUserByEmail(email, users);    // lower so we can check the database once its updated
-  
   //res.cookie('user_id', user.id);
   req.session.user_id = user.id;             // creation of the cookie
   return res.redirect('/urls');
@@ -245,7 +244,7 @@ app.get('/login', (req, res) => {
     res.render('urls_login', templateVars);
   } else {
     res.redirect('/urls');
-  } 
+  }
 });
 
 
@@ -262,7 +261,7 @@ app.post('/login', (req, res) => {
   if (!user) {
     return res.status(400).send('Email cannot be found');
   }
-  if (bcrypt.compareSync(user.password, bcrypt.hashSync(user.password, 10) ) !== true) {     // compares the password provided with the hash version, you have to hash them at the same time... cannot use hashed password like in register
+  if (bcrypt.compareSync(user.password, bcrypt.hashSync(user.password, 10)) !== true) {     // compares the password provided with the hash version, you have to hash them at the same time... cannot use hashed password like in register
     return res.status(403).send('Wrong password.');
   }
   //res.cookie('user_id', user.id);  // old way of creating cookie
@@ -275,5 +274,3 @@ app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
 });
 
-
-module.exports = { urlDatabase, users}
