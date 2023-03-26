@@ -127,13 +127,13 @@ app.post("/urls", (req, res) => {
 });
 
 app.get("/urls/new", (req, res) => {   // new route, should be ordered to most specific to least specific
-  
+  const usersDatabase = users
   const userId = req.session.user_id;
   if (!userId) {                  // Cannot create a new URL if not logged in
     
     return res.redirect('/login');
   }
-  const templateVars = { urls: urlDatabase[userId], userId: userId };
+  const templateVars = { urls: urlDatabase[userId], userId: userId , users: usersDatabase };
   res.render('urls_new', templateVars);
 
 });
@@ -141,7 +141,7 @@ app.get("/urls/new", (req, res) => {   // new route, should be ordered to most s
 
 app.get("/urls/:id", (req, res) => {   // :id route parameter
   const shorty = req.params.id;        // gets the :id value from the URL
-  
+  const usersDatabase = users
   const userId = req.session.user_id || null;
   if (!userId) {
     const box = `<div>You have to be logged in</div>`;
@@ -156,7 +156,7 @@ app.get("/urls/:id", (req, res) => {   // :id route parameter
     return res.status(400).send(box);
   }
 
-  const templateVars = { id: shorty, urls: urlDatabase, userId: userId };
+  const templateVars = { id: shorty, urls: urlDatabase, userId: userId, users: usersDatabase};
   res.render("urls_show", templateVars);
 });
 
@@ -218,17 +218,17 @@ app.post("/urls/:id", (req, res) => {
   
 app.get("/u/:id", (req, res) => {
   const id = req.params.id;              // gets the 6 random string associated with that URL
-  const id2 = req.session.user_id;        // the value of user_id in the object cookies
+  if (!urlDatabase[id]) {
+    const box = `<div>The URL for this ID doesnt exist</div>`;
+    return res.status(400).send(box);
+  }
+  
   const longURL = urlDatabase[id].longURL;    // link the id with the URL
   
-  if (id2 !== urlDatabase[id].userID) {       //if the cookie user_id is not in database
-    return res.status(400).send(`<div>Id does not exist</div>`);
-  }
   res.redirect(longURL);   //sends back to the original URL
 });
   
 app.post('/logout', (req, res) => {
-  
   //res.clearCookie('user_id');
   req.session = null;       // clear cookies equivalent, also destroy the signature
   res.redirect('/login');
@@ -283,29 +283,26 @@ app.get('/login', (req, res) => {
     res.render('urls_login', templateVars);
   } else {
     res.redirect('/urls');
-  }
-  
+  } 
 });
 
 
 app.post('/login', (req, res) => {
   const { email, password } = req.body;
   
-  const hashedPassword = bcrypt.hashSync(password, 10);
   if (email === "") {
     res.status(403).send('User invalid');
     return;
   }
   
   const user = findUserByEmail(email, users);      // lower so we can check the database once its updated
-  
+
   if (!user) {
     return res.status(400).send('Email cannot be found');
   }
-  if (bcrypt.compareSync(user.password, hashedPassword) !== true) {     // compares the password provided with the hash version
+  if (bcrypt.compareSync(user.password, bcrypt.hashSync(user.password, 10) ) !== true) {     // compares the password provided with the hash version, you have to hash them at the same time... cannot use hashed password like in register
     return res.status(403).send('Wrong password.');
   }
-  
   //res.cookie('user_id', user.id);  // old way of creating cookie
   req.session.user_id = user.id;     // creation of the cookie
   res.redirect('/urls');
